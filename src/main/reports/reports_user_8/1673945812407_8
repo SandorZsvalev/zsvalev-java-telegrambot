@@ -1,0 +1,25 @@
+Channel title: SecondPublishingForTest
+ id post: 11
+ date of post: янв. 15,2023 16:16
+ вряд ли сработает
+ *** 
+Channel title: SecondPublishingForTest
+ id post: 12
+ date of post: янв. 15,2023 16:20
+ А теперь еще раз - поглядим за результатом
+ *** 
+Channel title: SecondPublishingForTest
+ id post: 13
+ date of post: янв. 15,2023 16:28
+ ну и теперь еще разок
+ *** 
+Channel title: SecondPublishingForTest
+ id post: 14
+ date of post: янв. 15,2023 16:29
+ а тут вот должно
+ *** 
+Channel title: PublishingForTest
+ id post: 22
+ date of post: янв. 15,2023 16:29
+ Здесь скорее всего не сработает
+ *** 
