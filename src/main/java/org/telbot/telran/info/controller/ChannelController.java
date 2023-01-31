@@ -1,15 +1,12 @@
 package org.telbot.telran.info.controller;
 
-//1. Make as rest Controller
-//2. Create methods
-//3. Write annotation etc.
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.telbot.telran.info.exceptions.NoChannelFoundException;
 import org.telbot.telran.info.model.Channel;
 import org.telbot.telran.info.service.ChannelService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/channel")
@@ -19,30 +16,44 @@ public class ChannelController {
     private ChannelService channelService;
 
     @GetMapping
-    public List<Channel> channelList (){
-        return channelService.list();
+    public ResponseEntity<?> channelList() {
+        return new ResponseEntity<>(channelService.list(), HttpStatus.OK);
     }
 
-    @GetMapping ("/{id}")
-    public Channel getChannelById(@PathVariable(name = "id") int id){
-        return channelService.findById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getChannelById(@PathVariable(name = "id") int id) {
+        try {
+            return new ResponseEntity<>(channelService.findById(id), HttpStatus.OK);
+        } catch (NoChannelFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage() + " id: " + e.id);
+        }
     }
 
-    @PostMapping("/{name}")
-    public Channel createChannel(@PathVariable(name = "name") String name){
-        return channelService.create(name);
+    @PostMapping
+    public ResponseEntity<?> createChannel(@RequestBody Channel channel) {
+        try {
+            return new ResponseEntity<>(channelService.create(channel), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PutMapping
-    public Channel updateChannel (@RequestBody Channel channel){
-        return channelService.update(channel);
+    public ResponseEntity<?> updateChannel(@RequestBody Channel channel) {
+        try {
+            return new ResponseEntity<>(channelService.update(channel), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteChannel (@PathVariable(name = "id") int id){
-        channelService.deleteById(id);
+    public ResponseEntity<?> deleteChannel(@PathVariable(name = "id") int id) {
+        try {
+            channelService.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NoChannelFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
-
-
-
 }

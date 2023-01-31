@@ -3,8 +3,8 @@ package org.telbot.telran.info.model;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "telegram_channel_post")
-public class TelegramChannelPost {
+@Table(name = "channel_post")
+public class ChannelPost {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,10 +22,15 @@ public class TelegramChannelPost {
     @Column(name = "date_message")
     private int date;
 
-    public TelegramChannelPost() {
-    //
-    }
+    @Column(name = "unread")
+    private boolean unread;
 
+    @Column(name = "channel_inside_id")
+    private int channelInsideId;
+
+    public ChannelPost() {
+        //
+    }
 
     public int getId() {
         return id;
@@ -65,5 +70,21 @@ public class TelegramChannelPost {
 
     public void setDate(int date) {
         this.date = date;
+    }
+
+    public boolean isUnread() {
+        return unread;
+    }
+
+    public void setUnread(boolean unread) {
+        this.unread = unread;
+    }
+
+    public int getChannelInsideId() {
+        return channelInsideId;
+    }
+
+    public void setChannelInsideId(int channelInsideId) {
+        this.channelInsideId = channelInsideId;
     }
 }

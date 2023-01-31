@@ -1,29 +1,22 @@
 package org.telbot.telran.info.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.telbot.telran.info.model.Channel;
+import org.telbot.telran.info.exceptions.NoUserFoundException;
 import org.telbot.telran.info.model.User;
 import org.telbot.telran.info.repository.UserRepository;
+import org.telbot.telran.info.roles.Roles;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    private Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private ChannelService channelService;
-    // добавлять сюда - нормально
-    // инжектим всегда именно сервис, а не репозитории или контроллеры
-    // тк в сервисах все проверки и т.п.
-
 
     @Override
     public List<User> list() {
@@ -31,57 +24,55 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUser(int id) {
-        if(userRepository.findById(id).isPresent()){
-        return userRepository.findById(id).get();
+    public User getUser(int id) throws NoUserFoundException {
+        if (userRepository.findById(id).isPresent()) {
+            return userRepository.findById(id).get();
         } else {
-            //add logger
-            System.out.println("User not found");
-            return null;
+            log.error("User not found");
+            throw new NoUserFoundException(id);
         }
     }
 
     @Override
     public User createUser(String userName) {
+        if (userName.isEmpty() || (userName.isBlank())) {
+            log.error("Empty user name");
+            throw new IllegalArgumentException("Empty user name");
+        }
         User user = new User();
         user.setName(userName);
-        User userEntity = userRepository.save(user);
-        createUserDir(userEntity.getId());
-        return userEntity;
+        user.setRole(Roles.USER.getName());
+        return userRepository.save(user);
     }
 
     @Override
-    public void deleteUserById(int id) {
+    public void deleteUserById(int id) throws NoUserFoundException {
         User user = getUser(id);
-        if (user!=null) {
-            deleteUserDir(id);
+        if (user != null) {
             userRepository.delete(user);
         }
     }
 
     @Override
-    public User updateUser(User user) {
-        return userRepository.save(user);
-    }
-
-    private void createUserDir(int userId){
-        String dirName = "src/main/reports/reports_user_"+userId;
-        try {
-            Path directory = Files.createDirectory(Paths.get(dirName));
-        } catch (IOException e) {
-            e.printStackTrace();
-            //add logger
+    public User updateUser(User user) throws NoUserFoundException, IllegalArgumentException {
+        if (user.getId() == 0) {
+            log.error("No user id included");
+            throw new IllegalArgumentException("There are only user with id can be updated");
         }
+        User oldVersion = userRepository.findById(user.getId())
+                .orElseThrow(() -> new NoUserFoundException(user.getId()));
+        oldVersion.setName(user.getName());
+        oldVersion.setRole(user.getRole());
+        return userRepository.save(oldVersion);
     }
 
-    private void deleteUserDir(int userId){
-        String dirName = "src/main/reports/reports_user_"+userId;
+    public User changeRole(User user, String role) throws NoUserFoundException, IllegalArgumentException {
         try {
-            Files.deleteIfExists(Paths.get(dirName));
-        } catch (IOException e) {
-            e.printStackTrace();
-            //add logger
+            Roles.valueOf(role);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Wrong role");
         }
+        user.setRole(role);
+        return updateUser(user);
     }
-
 }

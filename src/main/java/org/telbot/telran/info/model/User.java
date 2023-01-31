@@ -5,30 +5,41 @@ import javax.persistence.*;
 @Entity
 @Table(name = "user_tbl")
 public class User {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        // можно заменить на GenerationType.IDENTITY тогда не будет сквозной нумерации
-        private int id;
-        @Column(name = "user_name")
-        private String name;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // можно заменить на GenerationType.IDENTITY тогда не будет сквозной нумерации
+    private int id;
+    @Column(name = "user_name")
+    private String name;
 
-        public User() {
-            ///
-        }
+    @Column(name = "role")
+    private String role;
 
-        public int getId() {
-                return id;
-        }
+    public User() {
+        ///
+    }
 
-        public void setId(int id) {
-                this.id = id;
-        }
+    public int getId() {
+        return id;
+    }
 
-        public String getName() {
-                return name;
-        }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-        public void setName(String name) {
-                this.name = name;
-        }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }

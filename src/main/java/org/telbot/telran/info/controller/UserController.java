@@ -1,18 +1,15 @@
 package org.telbot.telran.info.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.telbot.telran.info.model.Channel;
-import org.telbot.telran.info.model.Event;
+import org.telbot.telran.info.exceptions.NoUserFoundException;
 import org.telbot.telran.info.model.User;
-import org.telbot.telran.info.model.UserChannel;
-import org.telbot.telran.info.service.EventService;
+import org.telbot.telran.info.service.ChannelPostService;
 import org.telbot.telran.info.service.UserService;
 
 import java.util.List;
-
-//1. Make class as rest controller
-//2. Implement methods
 
 @RestController
 @RequestMapping("/user")
@@ -22,37 +19,56 @@ public class UserController {
     UserService userService;
 
     @Autowired
-    EventService eventService;
+    ChannelPostService channelPostService;
 
     @GetMapping
-    public List<User> list(){
+    public List<User> list() {
         return userService.list();
     }
 
     @GetMapping("/{id}")
-    public User getUserById (@PathVariable(name = "id") int id){
-        return userService.getUser(id);
+    public ResponseEntity<?> getUserById(@PathVariable(name = "id") int id) {
+        try {
+            return new ResponseEntity<>(userService.getUser(id), HttpStatus.OK);
+        } catch (NoUserFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PostMapping("/{name}")
-    public User createUser(@PathVariable(name = "name") String name){
-        return userService.createUser(name);
+    public ResponseEntity<?> createUser(@PathVariable(name = "name") String name) {
+        try {
+            return new ResponseEntity<>(userService.createUser(name), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUserById(@PathVariable(name = "id") int id){
-        userService.deleteUserById(id);
+    public ResponseEntity<?> deleteUserById(@PathVariable(name = "id") int id) {
+        try {
+            userService.deleteUserById(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NoUserFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PutMapping
-    public User updateUser (@RequestBody User user){
-        return userService.updateUser(user);
+    public ResponseEntity<?> updateUser(@RequestBody User user) {
+        try {
+            return new ResponseEntity<>(userService.updateUser(user), HttpStatus.OK);
+        } catch (NoUserFoundException | IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
-    @GetMapping("/get_event/{userId}")
-    public Event createEvent (@PathVariable(name = "userId") int userId){
-        System.out.println("вызвали удачно");
-        System.out.println("получили юзер айди "+userId);
-        return eventService.makeNewEvent(userId);
+    @PutMapping("/role")
+    public ResponseEntity<?> updateRole(@RequestBody User user, String role) {
+        try {
+            return new ResponseEntity<>(userService.changeRole(user, role), HttpStatus.OK);
+        } catch (NoUserFoundException | IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }
